@@ -1,0 +1,17 @@
+set guifont=Monaco:h12
+set number
+colorscheme vividchalk
+autocmd QuickFixCmdPost *grep* cwindow
+
+set ts=8
+set sw=2
+set expandtab
+set smarttab
+
+autocmd User Rails Rnavcommand emitter app/emitters -suffix=_emitter.rb -default=model()
+autocmd User Rails Rnavcommand renderer app/renderers -suffix=_renderer.rb -default=model()
+autocmd User Rails Rnavcommand strategy app/strategies -suffix=_strategy.rb -default=model()
+autocmd User Rails Rnavcommand notifier app/notifiers -suffix=_notifier.rb -default=model()
+
+map <up> <nop>
+map <down> <nop>

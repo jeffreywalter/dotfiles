@@ -1,0 +1,99 @@
+if [[ -s "$HOME/.rvm/scripts/rvm" ]] ; then source "$HOME/.rvm/scripts/rvm" ; fi
+[[ -r $rvm_path/scripts/completion ]] && source $rvm_path/scripts/completion
+
+[ -e "$DEV_DIR" ] || DEV_DIR="$HOME/Development"
+export DEV_DIR
+
+### Added by the Heroku Toolbelt
+#export PATH="/usr/local/heroku/bin:$PATH"
+
+# Tab completion
+if [ -n "$BASH_VERSION" ]; then
+  _dc()
+  {
+    local cur projects
+
+    [ -r "$DEV_DIR" ] || return 0
+
+    eval 'COMPREPLY=()'
+    cur=${COMP_WORDS[COMP_CWORD]}
+    projects=$(\ls "$DEV_DIR")
+
+    if [ $COMP_CWORD -eq 1 ]; then
+      eval 'COMPREPLY=( $(compgen -o filenames -W "$projects" $cur) )'
+    fi
+
+    return 0
+  }
+  complete -F _dc dc
+elif [ -n "$ZSH_VERSION" ]; then
+  compctl -/ -S '' -W "$DEV_DIR" scd
+fi
+
+dc() {
+  cd "$DEV_DIR/$1"
+}
+source /usr/local/etc/bash_completion.d/git-completion.bash
+function merl() {
+  PWD=`pwd`
+  BASE=`basename $PWD`
+  echo "erl -pa ./apps/$BASE/ebin/ ./apps/$BASE/.eunit/ ./deps/emongo/ebin ./deps/monaco_erlang_utils/ebin ./deps/monaco_erlang_rabbit_utils/ebin ./deps/mochiweb/ebin ./deps/log4erl/ebin ./deps/gen_bunny/ebin ./deps/meck/ebin ./deps/amqp_cl    ient/ebin ./deps/rabbit_common/ebin"
+  erl -pa ./apps/$BASE/ebin/ ./apps/$BASE/.eunit/ ./deps/emongo/ebin ./deps/monaco_erlang_utils/ebin ./deps/erlsom/ebin ./deps/monaco_erlang_rabbit_utils/ebin ./deps/mochiweb/ebin ./deps/log4erl/ebin ./deps/gen_bunny/ebin ./deps/meck/ebin .    /deps/amqp_client/ebin ./deps/rabbit_common/ebin ./deps/erlsom/ebin
+}
+
+function gco() { git checkout -b $1 origin/$1; }
+function gbco() { git checkout $1 origin/$1; }
+function gclone() { git clone git@git.tandbergtv.lan:monaco/$1.git;}
+function gdev() {
+  gclone $1
+  cd $1
+  gco dev
+  cd ..
+}
+
+function reset_branch() {
+  BRANCH=`git rev-parse --symbolic-full-name --abbrev-ref HEAD`
+  git fetch --all
+  git reset --hard origin/$BRANCH
+}
+
+function gss() {
+  git stash show -p stash@{$1}
+}
+
+# Add the following to your ~/.bashrc or ~/.zshrc
+hitch() {
+  command hitch "$@"
+  if [[ -s "$HOME/.hitch_export_authors" ]] ; then source "$HOME/.hitch_export_authors" ; fi
+}
+alias unhitch='hitch -u'
+# Uncomment to persist pair info between terminal instances
+# hitch
+
+alias fspork='spork cucumber'
+
+alias ts='date; time (rspec spec && flatware -w 4); date'
+alias fw='date; time (flatware -w 4);date'
+alias rw='rake jobs:work'
+alias rc='rake jobs:clear; rw'
+alias fwc='ps aux|grep flatware'
+alias migrate='rake db:migrate; rake db:test:prepare; flatware fan rake db:test:prepare'
+
+function pull_to_dev() {
+  dropdb search_discovery_development &&
+  createdb search_discovery_development &&
+  heroku db:pull -a searchdiscovery --confirm searchdiscovery &&
+  pg_dump search_discovery_development -f tmp/sd_production_dump.sql &&
+  mongodump -h walt.mongohq.com:10037 -d satellite-production -u heroku -p e8L49FYB874W -o tmp/mongodump/production &&
+  mongo search_discovery_development --eval "db.dropDatabase()" &&
+  mongorestore -h localhost:27017 --db search_discovery_development tmp/mongodump/production/satellite-production
+}
+
+function clone_to_dev() {
+  dropdb search_discovery_development &&
+  createdb search_discovery_development &&
+  psql -f tmp/sd_production_dump.sql search_discovery_development &&
+  mongo search_discovery_development --eval "db.dropDatabase()" &&
+  mongorestore -h localhost:27017 --db search_discovery_development tmp/mongodump/production/satellite-production
+}
+
