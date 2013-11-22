@@ -78,6 +78,13 @@ alias rw='rake jobs:work'
 alias rc='rake jobs:clear; rw'
 alias fwc='ps aux|grep flatware'
 alias migrate='rake db:migrate; rake db:test:prepare; flatware fan rake db:test:prepare'
+alias hconf='heroku config -a searchdiscovery'
+alias hconfs='heroku config -a searchdiscovery-staging'
+alias htail='heroku logs -n 1000 -t -a searchdiscovery'
+alias htails='heroku logs -n 1000 -t -a searchdiscovery-staging'
+alias hcon='heroku run console -a searchdiscovery'
+alias hcons='heroku run console -a searchdiscovery-staging'
+alias ls='ls -la'
 
 function pull_to_dev() {
   dropdb search_discovery_development &&
