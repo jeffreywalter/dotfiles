@@ -86,6 +86,16 @@ alias hcon='heroku run console -a searchdiscovery'
 alias hcons='heroku run console -a searchdiscovery-staging'
 alias ls='ls -la'
 
+function kfw() {
+  IDS=`ps aux|grep flatware|grep -v "grep" | awk '{print $2}' |tr "\\n" " "`
+  if [ -z "$IDS" ]; then
+    echo "No flatware processes running"
+  else
+    kill -9 $IDS
+    echo "Killed $IDS"
+  fi
+}
+
 function pull_to_dev() {
   dropdb search_discovery_development &&
   createdb search_discovery_development &&
