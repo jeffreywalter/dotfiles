@@ -99,9 +99,9 @@ function kfw() {
 function pull_to_dev() {
   dropdb search_discovery_development &&
   createdb search_discovery_development &&
-  heroku db:pull -a searchdiscovery --confirm searchdiscovery &&
-  pg_dump search_discovery_development -f tmp/sd_production_dump.sql &&
-  mongodump -h walt.mongohq.com:10037 -d satellite-production -u heroku -p e8L49FYB874W -o tmp/mongodump/production &&
+  curl -o tmp/sd_production.dump `heroku pgbackups:url -a searchdiscovery`
+  pg_restore --verbose --clean --no-acl --no-owner -h localhost -d search_discovery_development tmp/sd_production.dump
+  mongodump -h candidate.7.mongolayer.com:10155 -d adobe-dtm-production -u heroku -p e8L49FYB874W -o tmp/mongodump/production &&
   mongo search_discovery_development --eval "db.dropDatabase()" &&
   mongorestore -h localhost:27017 --db search_discovery_development tmp/mongodump/production/satellite-production
 }
@@ -109,7 +109,7 @@ function pull_to_dev() {
 function clone_to_dev() {
   dropdb search_discovery_development &&
   createdb search_discovery_development &&
-  psql -f tmp/sd_production_dump.sql search_discovery_development &&
+  pg_restore --verbose --clean --no-acl --no-owner -h localhost -d search_discovery_development tmp/sd_production.dump
   mongo search_discovery_development --eval "db.dropDatabase()" &&
   mongorestore -h localhost:27017 --db search_discovery_development tmp/mongodump/production/satellite-production
 }
