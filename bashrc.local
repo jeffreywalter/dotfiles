@@ -101,7 +101,7 @@ function pull_to_dev() {
   createdb search_discovery_development &&
   curl -o tmp/sd_production.dump `heroku pgbackups:url -a searchdiscovery`
   pg_restore --verbose --clean --no-acl --no-owner -h localhost -d search_discovery_development tmp/sd_production.dump
-  mongodump -h candidate.7.mongolayer.com:10155 -d adobe-dtm-production -u heroku -p <password> -o tmp/mongodump/production &&
+  mongodump -h candidate.7.mongolayer.com:10155 -d adobe-dtm-production -u <user> -p <password> -o tmp/mongodump/production &&
   mongo search_discovery_development --eval "db.dropDatabase()" &&
   mongorestore -h localhost:27017 --db search_discovery_development tmp/mongodump/production/satellite-production
 }
